@@ -1,0 +1,376 @@
+-- Mobile Script Finder
+local HttpService = game:GetService("HttpService")
+local MarketplaceService = game:GetService("MarketplaceService")
+local CoreGui = game:GetService("CoreGui")
+
+pcall(function()
+    HttpService.HttpEnabled = true
+end)
+
+local guiParent = (gethui and gethui()) or CoreGui
+
+local placeId = game.PlaceId
+local gameName = "Unknown Game"
+pcall(function()
+    local info = MarketplaceService:GetProductInfo(placeId)
+    gameName = info.Name or "Unknown Game"
+end)
+
+-- Favori Sistemini Kaydetmek/Yüklemek için Basit Dosya/Tablo Yönetimi
+local FAVORITES_KEY = "MobileScriptFinder_Favorites_V1"
+local favorites = {}
+pcall(function()
+    if readfile and isfile and isfile(FAVORITES_KEY .. ".json") then
+        favorites = HttpService:JSONDecode(readfile(FAVORITES_KEY .. ".json"))
+    end
+end)
+
+local function saveFavorites()
+    pcall(function()
+        if writefile then
+            writefile(FAVORITES_KEY .. ".json", HttpService:JSONEncode(favorites))
+        end
+    end)
+end
+
+-- ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "MobileScriptFinder"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = guiParent
+
+-- Aç/Kapat Butonu
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Size = UDim2.new(0, 42, 0, 42)
+ToggleBtn.Position = UDim2.new(0.02, 0, 0.2, 0)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(12, 12, 16)
+ToggleBtn.TextColor3 = Color3.fromRGB(220, 220, 230)
+ToggleBtn.Text = "📜"
+ToggleBtn.TextSize = 20
+ToggleBtn.Parent = ScreenGui
+
+-- Ana Panel
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 270, 0, 265)
+Frame.Position = UDim2.new(0.5, -135, 0.4, -132.5)
+Frame.BackgroundColor3 = Color3.fromRGB(10, 10, 14)
+Frame.BackgroundTransparency = 0.15
+Frame.Active = true
+Frame.Draggable = true
+Frame.Parent = ScreenGui
+
+-- Sağ Üst Bilgi (prepared by halilibrahimseviml1)
+local TopRightCredit = Instance.new("TextLabel")
+TopRightCredit.Size = UDim2.new(0, 140, 0, 14)
+TopRightCredit.Position = UDim2.new(1, -145, 0, 3)
+TopRightCredit.BackgroundTransparency = 1
+TopRightCredit.Text = "prepared by halilibrahimseviml1"
+TopRightCredit.TextColor3 = Color3.fromRGB(150, 150, 175)
+TopRightCredit.TextSize = 8
+TopRightCredit.Font = Enum.Font.SourceSansBold
+TopRightCredit.TextXAlignment = Enum.TextXAlignment.Right
+TopRightCredit.Parent = Frame
+
+-- Başlık ve Oyun Adı
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, -95, 0, 22)
+Title.Position = UDim2.new(0, 12, 0, 4)
+Title.BackgroundTransparency = 1
+Title.Text = "LightningHub⚡️Script Finder"
+Title.TextColor3 = Color3.fromRGB(210, 210, 225)
+Title.TextSize = 13
+Title.Font = Enum.Font.SourceSansBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = Frame
+
+-- Favoriler Sekme Butonu
+local TabFavBtn = Instance.new("TextButton")
+TabFavBtn.Size = UDim2.new(0, 55, 0, 18)
+TabFavBtn.Position = UDim2.new(1, -90, 0, 20)
+TabFavBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+TabFavBtn.TextColor3 = Color3.fromRGB(200, 200, 220)
+TabFavBtn.Text = "⭐ Favorites"
+TabFavBtn.TextSize = 9
+TabFavBtn.Font = Enum.Font.SourceSansBold
+TabFavBtn.Parent = Frame
+
+local GameNameLabel = Instance.new("TextLabel")
+GameNameLabel.Size = UDim2.new(1, -40, 0, 16)
+GameNameLabel.Position = UDim2.new(0, 12, 0, 24)
+GameNameLabel.BackgroundTransparency = 1
+GameNameLabel.Text = "🎮 " .. gameName
+GameNameLabel.TextColor3 = Color3.fromRGB(140, 140, 165)
+GameNameLabel.TextSize = 10
+GameNameLabel.Font = Enum.Font.SourceSans
+GameNameLabel.TextXAlignment = Enum.TextXAlignment.Left
+GameNameLabel.TextTruncate = Enum.TextTruncate.AtEnd
+GameNameLabel.Parent = Frame
+
+-- Kapatma Butonu
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 24, 0, 24)
+CloseBtn.Position = UDim2.new(1, -30, 0, 20)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(140, 40, 40)
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.Text = "X"
+CloseBtn.TextSize = 12
+CloseBtn.Parent = Frame
+CloseBtn.MouseButton1Click:Connect(function() Frame.Visible = false end)
+ToggleBtn.MouseButton1Click:Connect(function() Frame.Visible = not Frame.Visible end)
+
+-- Panelin Alt Kısmı (prepared by halilibrahimseviml1)
+local BottomCredit = Instance.new("TextLabel")
+BottomCredit.Size = UDim2.new(1, -16, 0, 16)
+BottomCredit.Position = UDim2.new(0, 8, 1, -18)
+BottomCredit.BackgroundTransparency = 1
+BottomCredit.Text = "prepared by halilibrahimseviml1"
+BottomCredit.TextColor3 = Color3.fromRGB(140, 140, 165)
+BottomCredit.TextSize = 9
+BottomCredit.Font = Enum.Font.SourceSansBold
+BottomCredit.TextXAlignment = Enum.TextXAlignment.Center
+BottomCredit.Parent = Frame
+
+-- Scroll Alanı
+local Scroll = Instance.new("ScrollingFrame")
+Scroll.Size = UDim2.new(1, -16, 1, -72)
+Scroll.Position = UDim2.new(0, 8, 0, 44)
+Scroll.BackgroundColor3 = Color3.fromRGB(14, 14, 20)
+Scroll.BackgroundTransparency = 0.4
+Scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+Scroll.ScrollBarThickness = 3
+Scroll.ScrollBarImageColor3 = Color3.fromRGB(55, 55, 75)
+Scroll.Parent = Frame
+
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.Parent = Scroll
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.Padding = UDim.new(0, 6)
+UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    Scroll.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 10)
+end)
+
+-- Scriptleri Çekme Fonksiyonu
+local function fetchGameScripts()
+    local scriptsList = {}
+    local seenIds = {}
+
+    if gameName ~= "" and gameName ~= "Unknown Game" then
+        local searchUrl = "https://scriptblox.com/api/script/search?q=" .. HttpService:UrlEncode(gameName) .. "&mode=free"
+        local success, response = pcall(function()
+            return game:HttpGet(searchUrl)
+        end)
+        
+        if success and response then
+            local data = HttpService:JSONDecode(response)
+            if data and data.result and data.result.scripts then
+                for _, s in ipairs(data.result.scripts) do
+                    local sId = s._id or s.slug
+                    if sId and not seenIds[sId] then
+                        seenIds[sId] = true
+                        table.insert(scriptsList, s)
+                    end
+                end
+            end
+        end
+    end
+
+    if #scriptsList == 0 then
+        local fetchUrl = "https://scriptblox.com/api/script/fetch?placeId=" .. tostring(placeId)
+        local success, response = pcall(function()
+            return game:HttpGet(fetchUrl)
+        end)
+        
+        if success and response then
+            local data = HttpService:JSONDecode(response)
+            if data and data.result and data.result.scripts then
+                for _, s in ipairs(data.result.scripts) do
+                    local sId = s._id or s.slug
+                    if sId and not seenIds[sId] then
+                        seenIds[sId] = true
+                        table.insert(scriptsList, s)
+                    end
+                end
+            end
+        end
+    end
+
+    return scriptsList
+end
+
+-- Arayüz Listeleme Fonksiyonu
+local showingFavoritesOnly = false
+
+local function renderScripts(scriptsToRender, isFavTab)
+    for _, child in ipairs(Scroll:GetChildren()) do
+        if child:IsA("Frame") or child:IsA("TextLabel") then
+            child:Destroy()
+        end
+    end
+
+    if #scriptsToRender == 0 then
+        local info = Instance.new("TextLabel")
+        info.Size = UDim2.new(1, 0, 0, 30)
+        info.BackgroundTransparency = 1
+        info.Text = isFavTab and "⭐ No scripts have been added to favorites yet." or "❌ No script was found for this game."
+        info.TextColor3 = Color3.fromRGB(130, 130, 150)
+        info.TextSize = 11
+        info.Parent = Scroll
+        return
+    end
+
+    for _, item in ipairs(scriptsToRender) do
+        local card = Instance.new("Frame")
+        card.Size = UDim2.new(1, 0, 0, 44)
+        card.BackgroundColor3 = Color3.fromRGB(18, 18, 26)
+        card.Parent = Scroll
+
+        -- Key Durumu Kontrolü (İsme dokunmadan ayrı ekleniyor)
+        local hasKey = item.isKey == true or item.key == true or (item.keyLink and item.keyLink ~= "")
+        local displayTitle = item.title or "Untitled Script"
+        
+        if hasKey then
+            displayTitle = displayTitle .. " KEY 🔑"
+        end
+
+        local sTitle = Instance.new("TextLabel")
+        sTitle.Size = UDim2.new(1, -135, 1, 0)
+        sTitle.Position = UDim2.new(0, 8, 0, 0)
+        sTitle.BackgroundTransparency = 1
+        sTitle.Text = displayTitle
+        sTitle.TextColor3 = Color3.fromRGB(195, 195, 215)
+        sTitle.TextSize = 10
+        sTitle.Font = Enum.Font.SourceSans
+        sTitle.TextTruncate = Enum.TextTruncate.AtEnd
+        sTitle.TextXAlignment = Enum.TextXAlignment.Left
+        sTitle.Parent = card
+
+        -- Script ID bulma (Favori kontrolü için)
+        local sId = tostring(item._id or item.slug or item.title)
+        local isFav = favorites[sId] ~= nil
+
+        -- Favori Butonu ⭐
+        local favBtn = Instance.new("TextButton")
+        favBtn.Size = UDim2.new(0, 22, 0, 26)
+        favBtn.Position = UDim2.new(1, -118, 0.5, -13)
+        favBtn.BackgroundColor3 = isFav and Color3.fromRGB(120, 100, 20) or Color3.fromRGB(40, 40, 55)
+        favBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        favBtn.Text = isFav and "⭐" or "☆"
+        favBtn.TextSize = 10
+        favBtn.Font = Enum.Font.SourceSansBold
+        favBtn.Parent = card
+
+        -- Çalıştır Butonu
+        local runBtn = Instance.new("TextButton")
+        runBtn.Size = UDim2.new(0, 42, 0, 26)
+        runBtn.Position = UDim2.new(1, -93, 0.5, -13)
+        runBtn.BackgroundColor3 = Color3.fromRGB(30, 110, 60)
+        runBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        runBtn.Text = "▶ Run"
+        runBtn.TextSize = 9
+        runBtn.Font = Enum.Font.SourceSansBold
+        runBtn.Parent = card
+
+        -- Kopyala Butonu
+        local copyBtn = Instance.new("TextButton")
+        copyBtn.Size = UDim2.new(0, 44, 0, 26)
+        copyBtn.Position = UDim2.new(1, -46, 0.5, -13)
+        copyBtn.BackgroundColor3 = Color3.fromRGB(35, 75, 140)
+        copyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        copyBtn.Text = "📋 Copy"
+        copyBtn.TextSize = 9
+        copyBtn.Font = Enum.Font.SourceSansBold
+        copyBtn.Parent = card
+
+        local scriptCode = item.script or item.code or ""
+
+        -- Favorilere Ekle/Çıkar İşlevi
+        favBtn.MouseButton1Click:Connect(function()
+            if favorites[sId] then
+                favorites[sId] = nil
+                favBtn.Text = "☆"
+                favBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+            else
+                favorites[sId] = item
+                favBtn.Text = "⭐"
+                favBtn.BackgroundColor3 = Color3.fromRGB(120, 100, 20)
+            end
+            saveFavorites()
+            
+            -- Eğer şu an favoriler sekmesindeysek listeyi güncelle
+            if showingFavoritesOnly then
+                local favList = {}
+                for _, favItem in pairs(favorites) do
+                    table.insert(favList, favItem)
+                end
+                renderScripts(favList, true)
+            end
+        end)
+
+        runBtn.MouseButton1Click:Connect(function()
+            if scriptCode ~= "" then
+                local success, err = pcall(function()
+                    loadstring(scriptCode)()
+                end)
+                if not success then
+                    runBtn.Text = "⚠️ ErrorLight"
+                    task.wait(1)
+                    runBtn.Text = "▶ Run"
+                end
+            end
+        end)
+
+        copyBtn.MouseButton1Click:Connect(function()
+            if scriptCode ~= "" then
+                if setclipboard then
+                    setclipboard(scriptCode)
+                    copyBtn.Text = "✅"
+                    task.wait(1)
+                    copyBtn.Text = "📋 Copy"
+                else
+                    copyBtn.Text = "❌"
+                    task.wait(1)
+                    copyBtn.Text = "📋 Copy"
+                end
+            end
+        end)
+    end
+end
+
+-- Sekme Değiştirme Buton Mantığı
+local cachedAllScripts = {}
+
+TabFavBtn.MouseButton1Click:Connect(function()
+    showingFavoritesOnly = not showingFavoritesOnly
+    if showingFavoritesOnly then
+        TabFavBtn.Text = "📜 View all"
+        TabFavBtn.BackgroundColor3 = Color3.fromRGB(100, 80, 20)
+        local favList = {}
+        for _, favItem in pairs(favorites) do
+            table.insert(favList, favItem)
+        end
+        renderScripts(favList, true)
+    else
+        TabFavBtn.Text = "⭐ Favorites"
+        TabFavBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+        renderScripts(cachedAllScripts, false)
+    end
+end)
+
+-- İlk Yükleme
+task.spawn(function()
+    local loadingLabel = Instance.new("TextLabel")
+    loadingLabel.Size = UDim2.new(1, 0, 0, 30)
+    loadingLabel.BackgroundTransparency = 1
+    loadingLabel.Text = "🔍 Looking for scripts..."
+    loadingLabel.TextColor3 = Color3.fromRGB(140, 140, 160)
+    loadingLabel.TextSize = 11
+    loadingLabel.Font = Enum.Font.SourceSans
+    loadingLabel.Parent = Scroll
+
+    cachedAllScripts = fetchGameScripts()
+    loadingLabel:Destroy()
+
+    if not showingFavoritesOnly then
+        renderScripts(cachedAllScripts, false)
+    end
+end)
