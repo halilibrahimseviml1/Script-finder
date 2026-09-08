@@ -1,4 +1,4 @@
--- Mobile Script Finder
+-- Mobile Script Finder & Global Chat Integrated
 local HttpService = game:GetService("HttpService")
 local MarketplaceService = game:GetService("MarketplaceService")
 local CoreGui = game:GetService("CoreGui")
@@ -57,9 +57,44 @@ Frame.BackgroundColor3 = Color3.fromRGB(10, 10, 14)
 Frame.BackgroundTransparency = 0.15
 Frame.Active = true
 Frame.Draggable = true
-Frame.Parent = ScreenGui
+Frame.Visible = true
+Frame.Parent = ScreenGui -- DÜZELTİLDİ: Panel ekrana bağlandı
 
--- Sağ Üst Bilgi (prepared by halilibrahimseviml1)
+-- Sol Sekme Barı (Sidebar)
+local Sidebar = Instance.new("Frame")
+Sidebar.Size = UDim2.new(0, 38, 0, 80)
+Sidebar.Position = UDim2.new(0, -42, 0, 0)
+Sidebar.BackgroundColor3 = Color3.fromRGB(12, 12, 16)
+Sidebar.BackgroundTransparency = 0.15
+Sidebar.BorderSizePixel = 0
+Sidebar.Parent = Frame
+
+local SidebarLayout = Instance.new("UIListLayout")
+SidebarLayout.Parent = Sidebar
+SidebarLayout.SortOrder = Enum.SortOrder.LayoutOrder
+SidebarLayout.Padding = UDim.new(0, 4)
+
+-- Sol Bar Script Finder Butonu (📜)
+local TabFinderBtn = Instance.new("TextButton")
+TabFinderBtn.Size = UDim2.new(1, 0, 0, 36)
+TabFinderBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+TabFinderBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+TabFinderBtn.Text = "📜"
+TabFinderBtn.TextSize = 16
+TabFinderBtn.LayoutOrder = 1
+TabFinderBtn.Parent = Sidebar
+
+-- Sol Bar Global Chat Butonu (💬)
+local TabChatBtn = Instance.new("TextButton")
+TabChatBtn.Size = UDim2.new(1, 0, 0, 36)
+TabChatBtn.BackgroundColor3 = Color3.fromRGB(18, 18, 26)
+TabChatBtn.TextColor3 = Color3.fromRGB(180, 180, 200)
+TabChatBtn.Text = "💬"
+TabChatBtn.TextSize = 16
+TabChatBtn.LayoutOrder = 2
+TabChatBtn.Parent = Sidebar
+
+-- Sağ Üst Bilgi
 local TopRightCredit = Instance.new("TextLabel")
 TopRightCredit.Size = UDim2.new(0, 140, 0, 14)
 TopRightCredit.Position = UDim2.new(1, -145, 0, 3)
@@ -118,7 +153,7 @@ CloseBtn.Parent = Frame
 CloseBtn.MouseButton1Click:Connect(function() Frame.Visible = false end)
 ToggleBtn.MouseButton1Click:Connect(function() Frame.Visible = not Frame.Visible end)
 
--- Panelin Alt Kısmı (prepared by halilibrahimseviml1)
+-- Panelin Alt Kısmı
 local BottomCredit = Instance.new("TextLabel")
 BottomCredit.Size = UDim2.new(1, -16, 0, 16)
 BottomCredit.Position = UDim2.new(0, 8, 1, -18)
@@ -130,7 +165,7 @@ BottomCredit.Font = Enum.Font.SourceSansBold
 BottomCredit.TextXAlignment = Enum.TextXAlignment.Center
 BottomCredit.Parent = Frame
 
--- Scroll Alanı
+-- Scroll Alanı (Script Finder İçeriği)
 local Scroll = Instance.new("ScrollingFrame")
 Scroll.Size = UDim2.new(1, -16, 1, -72)
 Scroll.Position = UDim2.new(0, 8, 0, 44)
@@ -140,6 +175,14 @@ Scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
 Scroll.ScrollBarThickness = 3
 Scroll.ScrollBarImageColor3 = Color3.fromRGB(55, 55, 75)
 Scroll.Parent = Frame
+
+-- Global Chat İçin Container
+local ChatContainer = Instance.new("Frame")
+ChatContainer.Size = UDim2.new(1, -16, 1, -72)
+ChatContainer.Position = UDim2.new(0, 8, 0, 44)
+ChatContainer.BackgroundTransparency = 1
+ChatContainer.Visible = false
+ChatContainer.Parent = Frame
 
 local UIListLayout = Instance.new("UIListLayout")
 UIListLayout.Parent = Scroll
@@ -224,7 +267,6 @@ local function renderScripts(scriptsToRender, isFavTab)
         card.BackgroundColor3 = Color3.fromRGB(18, 18, 26)
         card.Parent = Scroll
 
-        -- Key Durumu Kontrolü (İsme dokunmadan ayrı ekleniyor)
         local hasKey = item.isKey == true or item.key == true or (item.keyLink and item.keyLink ~= "")
         local displayTitle = item.title or "Untitled Script"
         
@@ -244,11 +286,9 @@ local function renderScripts(scriptsToRender, isFavTab)
         sTitle.TextXAlignment = Enum.TextXAlignment.Left
         sTitle.Parent = card
 
-        -- Script ID bulma (Favori kontrolü için)
         local sId = tostring(item._id or item.slug or item.title)
         local isFav = favorites[sId] ~= nil
 
-        -- Favori Butonu ⭐
         local favBtn = Instance.new("TextButton")
         favBtn.Size = UDim2.new(0, 22, 0, 26)
         favBtn.Position = UDim2.new(1, -118, 0.5, -13)
@@ -259,7 +299,6 @@ local function renderScripts(scriptsToRender, isFavTab)
         favBtn.Font = Enum.Font.SourceSansBold
         favBtn.Parent = card
 
-        -- Çalıştır Butonu
         local runBtn = Instance.new("TextButton")
         runBtn.Size = UDim2.new(0, 42, 0, 26)
         runBtn.Position = UDim2.new(1, -93, 0.5, -13)
@@ -270,7 +309,6 @@ local function renderScripts(scriptsToRender, isFavTab)
         runBtn.Font = Enum.Font.SourceSansBold
         runBtn.Parent = card
 
-        -- Kopyala Butonu
         local copyBtn = Instance.new("TextButton")
         copyBtn.Size = UDim2.new(0, 44, 0, 26)
         copyBtn.Position = UDim2.new(1, -46, 0.5, -13)
@@ -283,7 +321,6 @@ local function renderScripts(scriptsToRender, isFavTab)
 
         local scriptCode = item.script or item.code or ""
 
-        -- Favorilere Ekle/Çıkar İşlevi
         favBtn.MouseButton1Click:Connect(function()
             if favorites[sId] then
                 favorites[sId] = nil
@@ -296,7 +333,6 @@ local function renderScripts(scriptsToRender, isFavTab)
             end
             saveFavorites()
             
-            -- Eğer şu an favoriler sekmesindeysek listeyi güncelle
             if showingFavoritesOnly then
                 local favList = {}
                 for _, favItem in pairs(favorites) do
@@ -320,7 +356,7 @@ local function renderScripts(scriptsToRender, isFavTab)
         end)
 
         copyBtn.MouseButton1Click:Connect(function()
-            if scriptCode ~= "" then
+            if scriptCode ~= "" then -- DÜZELTİLDİ: scriptCode
                 if setclipboard then
                     setclipboard(scriptCode)
                     copyBtn.Text = "✅"
@@ -336,7 +372,7 @@ local function renderScripts(scriptsToRender, isFavTab)
     end
 end
 
--- Sekme Değiştirme Buton Mantığı
+-- Sekme Değiştirme Buton Mantığı (Favorites)
 local cachedAllScripts = {}
 
 TabFavBtn.MouseButton1Click:Connect(function()
@@ -353,6 +389,45 @@ TabFavBtn.MouseButton1Click:Connect(function()
         TabFavBtn.Text = "⭐ Favorites"
         TabFavBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
         renderScripts(cachedAllScripts, false)
+    end
+end)
+
+-- Sol Menü Sekme Geçişleri
+local activeTab = "finder"
+
+TabFinderBtn.MouseButton1Click:Connect(function()
+    if activeTab ~= "finder" then
+        activeTab = "finder"
+        TabFinderBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+        TabFinderBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        TabChatBtn.BackgroundColor3 = Color3.fromRGB(18, 18, 26)
+        TabChatBtn.TextColor3 = Color3.fromRGB(180, 180, 200)
+        
+        Scroll.Visible = true
+        ChatContainer.Visible = false
+        TabFavBtn.Visible = true
+        Title.Text = "LightningHub⚡️Script Finder"
+    end
+end)
+
+TabChatBtn.MouseButton1Click:Connect(function()
+    if activeTab ~= "chat" then
+        activeTab = "chat"
+        TabChatBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+        TabChatBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        TabFinderBtn.BackgroundColor3 = Color3.fromRGB(18, 18, 26)
+        TabFinderBtn.TextColor3 = Color3.fromRGB(180, 180, 200)
+        
+        Scroll.Visible = false
+        ChatContainer.Visible = true
+        TabFavBtn.Visible = false
+        Title.Text = "LightningHub⚡️Global Chat"
+        
+        if not ChatContainer:FindFirstChildOfClass("UIListLayout") then
+            pcall(function()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/halilibrahimseviml1/Global-chat/refs/heads/main/Global-chat"))()
+            end)
+        end
     end
 end)
 
